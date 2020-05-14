@@ -1,22 +1,32 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Text, View, StyleSheet, Animated, Dimensions } from "react-native";
 import { SvgXml } from "react-native-svg";
 
 const heightScreen = Dimensions.get("window").height;
 const widthtScreen = Dimensions.get("window").width;
-const TifiToast = (props) => {
+export const TifiToast = (props) => {
   const { width, height } = props.style;
   const { color } = props;
-  console.log(heightScreen, widthtScreen);
+
+  const [isLive, setIsLive] = useState(true);
 
   // Animation value
   const valueY = useRef(new Animated.Value(heightScreen)).current;
   useEffect(() => {
+    isLive?
     Animated.timing(valueY, {
-      toValue: 0,
+      toValue: heightScreen*0.4,
+      duration: 500,
+    }).start(() => hideToast()):null
+  },[]);
+
+  const hideToast = () => {
+    Animated.timing(valueY, {
+      toValue: heightScreen,
       duration: 1000,
-    }).start();
-  }, []);
+      delay: 3000,
+    }).start(() => setIsLive(false));
+  };
 
   // Toast dinamic shape
   const xml = `
@@ -28,7 +38,7 @@ const TifiToast = (props) => {
     width - 3
   } ${height + 118}) rotate(45)" fill=${color}/></g></svg>
     `;
-  return (
+  return isLive ? (
     <Animated.View
       {...props}
       style={[styles.container, { transform: [{ translateY: valueY }] }]}
@@ -39,7 +49,7 @@ const TifiToast = (props) => {
       </View>
       <SvgXml xml={xml} width={width}></SvgXml>
     </Animated.View>
-  );
+  ) : null;
 };
 
 const styles = StyleSheet.create({
@@ -49,7 +59,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 50,
     opacity: 0.8,
     position: "absolute",
-    backgroundColor: "red",
     width: widthtScreen,
   },
   textContainer: {
@@ -64,4 +73,4 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-export default TifiToast;
+
